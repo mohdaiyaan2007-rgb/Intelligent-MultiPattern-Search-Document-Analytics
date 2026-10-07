@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f2f5f0">
+    <title>Document Search &amp; Analytics Engine</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Document engine home">
+          <span class="brand-mark" aria-hidden="true">DS</span>
+          <span class="brand-copy">
+            <strong>Document engine</strong>
+            <span>SEARCH &amp; ANALYTICS</span>
+          </span>
+        </a>
+        <nav class="primary-nav" aria-label="Main navigation">
+          <button class="nav-tab" id="nav-documents" type="button" data-view="documents" aria-current="page">Documents</button>
+          <button class="nav-tab" id="nav-search" type="button" data-view="search">Search</button>
+          <button class="nav-tab" id="nav-analytics" type="button" data-view="analytics">Analytics</button>
+        </nav>
+        <button class="refresh-button" id="refresh-all-button" type="button">Refresh collection</button>
+      </header>
+
+      <div class="app-status" id="app-status" role="status" aria-live="polite" hidden></div>
+      <main class="dashboard">
+        <div class="workspace-heading">
+          <div>
+            <p class="eyebrow">INTELLIGENT MULTI-PATTERN SEARCH</p>
+            <h1 id="page-title">Document workspace</h1>
+          </div>
+          <p class="index-status" id="index-status" role="status">Checking index...</p>
+        </div>
+
+        <section class="app-view" id="documents-view" aria-labelledby="documents-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">COLLECTION</p>
+              <h2 id="documents-title">Document management</h2>
+            </div>
+            <button class="secondary-button" id="refresh-documents-button" type="button">Refresh documents</button>
+          </div>
+
+          <form class="upload-panel" id="upload-form">
+            <div class="upload-copy">
+              <label for="document-files">Add documents</label>
+              <p>Supported formats: TXT, Markdown (.md), and CSV. Maximum 10 MiB per file.</p>
+            </div>
+            <input id="document-files" name="files" type="file" accept=".txt,.md,.csv,text/plain,text/markdown,text/csv" multiple>
+            <button class="primary-button" id="upload-button" type="submit">Upload selected</button>
+            <p class="inline-status" id="upload-status" role="status" aria-live="polite" hidden></p>
+          </form>
+
+          <section class="table-panel" aria-labelledby="document-table-title">
+            <div class="table-heading">
+              <div>
+                <h3 id="document-table-title">Indexed documents</h3>
+                <p id="documents-status" class="muted-copy" role="status" aria-live="polite">Loading documents...</p>
+              </div>
+            </div>
+            <p class="empty-state" id="documents-empty" hidden>No documents are indexed yet. Upload TXT, Markdown, or CSV files to begin.</p>
+            <div class="table-scroll" id="documents-table-wrap">
+              <table class="document-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Filename</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Tokens</th>
+                    <th scope="col">Document ID</th>
+                    <th scope="col"><span class="visually-hidden">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="document-rows"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="app-view" id="search-view" aria-labelledby="search-title" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">QUERY</p>
+              <h2 id="search-title">Search the collection</h2>
+            </div>
+            <p class="muted-copy">Search uses the current in-memory index.</p>
+          </div>
+
+          <div class="search-workspace">
+            <div class="search-sidebar">
+              <div class="search-mode-tabs" role="tablist" aria-label="Search mode">
+                <button class="mode-tab" id="mode-tab-multi" type="button" role="tab" aria-selected="true" data-search-mode="multi">Multi-pattern</button>
+                <button class="mode-tab" id="mode-tab-phrase" type="button" role="tab" aria-selected="false" data-search-mode="phrase">Exact phrase</button>
+                <button class="mode-tab" id="mode-tab-wildcard" type="button" role="tab" aria-selected="false" data-search-mode="wildcard">Wildcard</button>
+                <button class="mode-tab" id="mode-tab-ranked" type="button" role="tab" aria-selected="false" data-search-mode="ranked">Ranked</button>
+              </div>
+
+              <section class="search-panel" id="search-panel-multi" role="tabpanel" aria-labelledby="mode-tab-multi">
+                <form id="multi-form" class="search-form">
+                  <label for="multi-pattern-input">Patterns</label>
+                  <textarea id="multi-pattern-input" rows="4" placeholder="python, database, machine learning"></textarea>
+                  <p class="form-hint">Separate patterns with commas or new lines.</p>
+                  <button class="primary-button" id="multi-search-button" type="submit">Search patterns</button>
+                </form>
+                <p class="inline-status" id="multi-status" role="status" aria-live="polite" hidden></p>
+              </section>
+
+              <section class="search-panel" id="search-panel-phrase" role="tabpanel" aria-labelledby="mode-tab-phrase" hidden>
+                <form id="phrase-form" class="search-form">
+                  <label for="phrase-input">Exact phrase</label>
+                  <input id="phrase-input" type="search" placeholder="machine learning">
+                  <p class="form-hint">Words must occur consecutively and in the same order.</p>
+                  <button class="primary-button" id="phrase-search-button" type="submit">Search phrase</button>
+                </form>
+                <p class="inline-status" id="phrase-status" role="status" aria-live="polite" hidden></p>
+              </section>
+
+              <section class="search-panel" id="search-panel-wildcard" role="tabpanel" aria-labelledby="mode-tab-wildcard" hidden>
+                <form id="wildcard-form" class="search-form">
+                  <label for="wildcard-input">Wildcard pattern</label>
+                  <input id="wildcard-input" type="search" placeholder="pyth*">
+                  <p class="form-hint">Supported forms: <code>pyth*</code> (prefix) and <code>*base</code> (suffix).</p>
+                  <button class="primary-button" id="wildcard-search-button" type="submit">Search wildcard</button>
+                </form>
+                <p class="inline-status" id="wildcard-status" role="status" aria-live="polite" hidden></p>
+              </section>
+
+              <section class="search-panel" id="search-panel-ranked" role="tabpanel" aria-labelledby="mode-tab-ranked" hidden>
+                <form id="ranked-form" class="search-form">
+                  <label for="ranked-input">Keyword query</label>
+                  <input id="ranked-input" type="search" placeholder="python database">
+                  <p class="form-hint">Results use term frequency, query coverage, and exact phrase matches.</p>
+                  <button class="primary-button" id="ranked-search-button" type="submit">Rank results</button>
+                </form>
+                <p class="inline-status" id="ranked-status" role="status" aria-live="polite" hidden></p>
+              </section>
+            </div>
+
+            <section class="results-panel" aria-labelledby="results-title">
+              <div class="results-heading">
+                <div>
+                  <p class="eyebrow">OUTPUT</p>
+                  <h3 id="results-title">Search results</h3>
+                </div>
+              </div>
+              <div id="multi-results" class="search-results" role="region" aria-label="Multi-pattern search results" hidden></div>
+              <div id="phrase-results" class="search-results" role="region" aria-label="Phrase search results" hidden></div>
+              <div id="wildcard-results" class="search-results" role="region" aria-label="Wildcard search results" hidden></div>
+              <div id="ranked-results" class="search-results" role="region" aria-label="Ranked search results" hidden></div>
+              <p class="empty-state results-placeholder" id="results-placeholder">Choose a search mode and submit a query.</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="app-view" id="analytics-view" aria-labelledby="analytics-title" hidden>
+          <section class="intro analytics-intro">
+            <div>
+              <p class="eyebrow">INDEX OVERVIEW</p>
+              <h2 id="analytics-title">Your collection,<br>in focus.</h2>
+              <p class="intro-copy">Live statistics from the indexed document collection.</p>
+            </div>
+            <p class="load-status" id="load-status" role="status" aria-live="polite">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span id="load-status-text">Loading analytics</span>
+            </p>
+          </section>
+
+          <p class="inline-status" id="analytics-status" role="status" aria-live="polite" hidden></p>
+          <section class="metrics" aria-label="Collection overview">
+            <article class="metric metric--teal"><p>Total documents</p><strong id="metric-documents">--</strong><span>currently indexed</span></article>
+            <article class="metric metric--gold"><p>Indexed words</p><strong id="metric-words">--</strong><span>token occurrences</span></article>
+            <article class="metric metric--coral"><p>Unique terms</p><strong id="metric-terms">--</strong><span>in the index</span></article>
+            <article class="metric metric--blue"><p>Average length</p><strong id="metric-average">--</strong><span>tokens per document</span></article>
+            <article class="metric metric--teal"><p>Shortest document</p><strong id="metric-shortest">--</strong><span>tokens</span></article>
+            <article class="metric metric--gold"><p>Longest document</p><strong id="metric-longest">--</strong><span>tokens</span></article>
+          </section>
+
+          <section class="chart-panel chart-panel--wide" aria-labelledby="length-title">
+            <div class="chart-heading">
+              <div><p class="eyebrow">DOCUMENTS</p><h3 id="length-title">Length comparison</h3></div>
+              <p class="chart-note">Token count by filename</p>
+            </div>
+            <div class="bar-chart bar-chart--teal" id="document-length-chart" role="list" aria-label="Document length bar chart"></div>
+          </section>
+
+          <div class="term-charts">
+            <section class="chart-panel" aria-labelledby="frequency-title">
+              <div class="chart-heading">
+                <div><p class="eyebrow">VOCABULARY</p><h3 id="frequency-title">Top terms</h3></div>
+                <p class="chart-note">Occurrence count</p>
+              </div>
+              <div class="bar-chart bar-chart--gold" id="term-frequency-chart" role="list" aria-label="Top term frequency bar chart"></div>
+            </section>
+            <section class="chart-panel" aria-labelledby="document-frequency-title">
+              <div class="chart-heading">
+                <div><p class="eyebrow">DISTRIBUTION</p><h3 id="document-frequency-title">Document frequency</h3></div>
+                <p class="chart-note">Documents containing term</p>
+              </div>
+              <div class="bar-chart bar-chart--coral" id="document-frequency-chart" role="list" aria-label="Term document frequency bar chart"></div>
+            </section>
+          </div>
+          <footer class="page-footer"><span>Source: indexed collection analytics</span><span>Values refresh from the live API</span></footer>
+        </section>
+      </main>
+    </div>
+    <script defer src="js/analytics-data.js"></script>
+    <script defer src="js/app.js"></script>
+  </body>
+</html>
